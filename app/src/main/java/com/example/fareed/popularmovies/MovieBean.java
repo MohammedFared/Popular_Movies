@@ -16,6 +16,7 @@ public class MovieBean {
 
     private int page;
     private int total_results;
+
     private int total_pages;
     /**
      * poster_path : /cGOPbv9wA5gEejkUN892JrveARt.jpg
