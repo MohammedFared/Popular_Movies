@@ -1,4 +1,4 @@
-package com.example.fareed.popularmovies;
+package com.example.fareed.popularmovies.Models;
 
 import java.util.List;
 

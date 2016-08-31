@@ -1,28 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_activty"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-    <TextView
-        android:id="@+id/textView_popOrTop"
-        android:layout_margin="16dp"
-        android:text="@string/popular"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceLarge"/>
-    <android.support.v4.widget.SwipeRefreshLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/swipeContainer"
+    android:orientation="vertical"
+    tools:context="com.example.fareed.popularmovies.MainActivity">
+
+    <FrameLayout
+        android:id="@+id/flContent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/moviesGrid"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:columnWidth="150dp"
-            android:numColumns="auto_fit"
-            android:verticalSpacing="8dp"
-            android:horizontalSpacing="8dp"
-            android:stretchMode="columnWidth"/>
-    </android.support.v4.widget.SwipeRefreshLayout>
+        android:layout_height="match_parent"/>
+    <!--<TextView-->
+        <!--android:id="@+id/textView_popOrTop"-->
+        <!--android:layout_margin="16dp"-->
+        <!--android:text="@string/popular"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:textAppearance="?android:textAppearanceLarge"/>-->
+
+    <!--<ProgressBar-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/progressBar"-->
+        <!--android:layout_gravity="center" />-->
+
+    <!--<android.support.v4.widget.SwipeRefreshLayout-->
+        <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--android:id="@+id/swipeContainer"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+        <!--<GridView xmlns:android="http://schemas.android.com/apk/res/android"-->
+            <!--android:id="@+id/moviesGrid"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:columnWidth="150dp"-->
+            <!--android:numColumns="auto_fit"-->
+            <!--android:verticalSpacing="8dp"-->
+            <!--android:horizontalSpacing="8dp"-->
+            <!--android:stretchMode="columnWidth"/>-->
+    <!--</android.support.v4.widget.SwipeRefreshLayout>-->
 </LinearLayout>

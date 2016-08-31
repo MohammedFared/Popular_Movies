@@ -1,71 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MovieDetails">
 
-    <RelativeLayout
-        android:id="@+id/realtiveLayout_top"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/image_poster"
-        android:layout_width="342px"
-        android:layout_height="513px"/>
+        <RelativeLayout
+            android:padding="16dp"
+            android:id="@+id/realtiveLayout_top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <TextView
-        android:layout_toRightOf="@id/image_poster"
-        android:layout_marginLeft="16dp"
-        android:text="SuicideSquad"
-        android:textAppearance="?android:textAppearanceLarge"
-        android:id="@+id/textView_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            <ImageView
+                android:id="@+id/image_poster"
+                android:layout_width="342px"
+                android:layout_height="513px" />
 
-    <TextView
-        android:layout_marginLeft="16dp"
-        android:layout_marginBottom="16dp"
-        android:layout_toRightOf="@id/image_poster"
-        android:textAppearance="?textAppearanceListItem"
-        android:layout_marginTop="16dp"
-        android:id="@+id/textView_date"
-        android:layout_below="@id/textView_title"
-        android:text="5.5 /10.0"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/textView_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_toRightOf="@id/image_poster"
+                android:text="SuicideSquad"
+                android:textAppearance="?android:textAppearanceLarge" />
 
-    <RatingBar
-        android:layout_toRightOf="@id/image_poster"
-        android:layout_below="@id/textView_date"
-        style="?android:ratingBarStyleSmall"
-        android:numStars="10"
-        android:layout_marginLeft="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ratingBar" />
+            <TextView
+                android:id="@+id/textView_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView_title"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_toRightOf="@id/image_poster"
+                android:text="5.5 /10.0"
+                android:textAppearance="?textAppearanceListItem" />
 
-    <TextView
-        android:id="@+id/textView_Rating"
-        android:layout_toEndOf="@id/ratingBar"
-        android:layout_below="@id/textView_date"
-        android:layout_marginLeft="8dp"
-        android:text="5.5 /10.0"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    </RelativeLayout>
+            <RatingBar
+                android:id="@+id/ratingBar"
+                style="?android:ratingBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView_date"
+                android:layout_marginLeft="16dp"
+                android:layout_toRightOf="@id/image_poster"
+                android:numStars="10" />
 
-    <TextView
-        android:textAppearance="?textAppearanceListItem"
-        android:layout_marginTop="16dp"
-        android:id="@+id/textView_overView"
-        android:layout_below="@id/realtiveLayout_top"
-        android:text="5.5 /10.0"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</RelativeLayout>
+            <TextView
+                android:id="@+id/textView_Rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView_date"
+                android:layout_marginLeft="16dp"
+                android:layout_toEndOf="@id/image_poster"
+                android:text="5.5 /10.0" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:padding="16dp"
+            android:background="#f0f0f0"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/overView"
+                android:layout_marginBottom="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OverView" />
+
+            <TextView
+                android:paddingLeft="16dp"
+                android:id="@+id/textView_overView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="5.5 /10.0"
+                android:textAppearance="?textAppearanceListItem" />
+        </LinearLayout>
+        <LinearLayout
+            android:padding="16dp"
+            android:background="#f0f0f0"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="4dp"
+            android:id="@+id/linearLayout_trailers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:text="@string/trailers"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:padding="16dp"
+            android:background="#f0f0f0"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="4dp"
+            android:id="@+id/linearLayout_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:text="@string/reviews"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
