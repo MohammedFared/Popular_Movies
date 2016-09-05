@@ -84,8 +84,8 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
         textView_overView.setText(overView);
         textView_date = (TextView) view.findViewById(R.id.textView_date);
         textView_date.setText(date);
-        ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
-        ratingBar.setRating((float) rating);
+//        ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
+//        ratingBar.setRating((float) rating);
 
         view.findViewById(R.id.button_favorite).setOnClickListener(this);
 
