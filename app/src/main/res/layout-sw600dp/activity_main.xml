@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tablet_FramesContainer"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/leftFrame"
+        android:layout_width="340dp"
+        android:layout_height="match_parent"/>
+
+    <FrameLayout
+        android:id="@+id/rightFrame"
+        android:layout_toRightOf="@id/leftFrame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>

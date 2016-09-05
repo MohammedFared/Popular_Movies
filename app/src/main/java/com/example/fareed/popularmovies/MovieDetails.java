@@ -21,13 +21,12 @@ import com.example.fareed.popularmovies.Models.TrailersBean;
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
-public class MovieDetails extends AppCompatActivity {
+public class MovieDetails extends AppCompatActivity  {
     String TAG = "MOVIEDETAILSLOG", baseUrl = "http://api.themoviedb.org/3/movie/", APIKEY = "api_key="+BuildConfig.MOVIE_API_KEY;
     TextView textView_title, textView_rating, textView_overView, textView_date;
     ImageView image_poster;
@@ -44,36 +43,46 @@ public class MovieDetails extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        Intent intent = getIntent();
-        String title = intent.getStringExtra("title");
-        actionBar.setTitle(title);
-        String date = intent.getStringExtra("date");
-        String poster = intent.getStringExtra("poster");
-        double rating = intent.getDoubleExtra("rating", 1.5);
+        actionBar.setTitle(getIntent().getStringExtra("title"));
+
+        if (savedInstanceState == null){
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.movie_details, new MovieDetailsFragment())
+                    .commit();
+        }
+//
+//        Intent intent = getIntent();
+//        String title = intent.getStringExtra("title");
+//        actionBar.setTitle(title);
+//        String date = intent.getStringExtra("date");
+//        String poster = intent.getStringExtra("poster");
+//        double rating = intent.getDoubleExtra("rating", 1.5);
 //        Log.d(TAG, "onCreate: "+rating);
-        String overView = intent.getStringExtra("overView");
-        movieId = intent.getIntExtra("movieId", 1);
-        Log.d(TAG, "onCreate: movieId" + movieId);
+//        String overView = intent.getStringExtra("overView");
+//        movieId = intent.getIntExtra("movieId", 1);
+//        Log.d(TAG, "onCreate: movieId" + movieId);
 
-        //initialize views
-        image_poster = (ImageView) findViewById(R.id.image_poster);
-        Picasso.with(this).load(poster).into(image_poster);
-        textView_title = (TextView) findViewById(R.id.textView_title);
-        textView_title.setText(title);
-        textView_rating = (TextView) findViewById(R.id.textView_Rating);
-        textView_rating.setText(rating + " / 10.0");
-        textView_overView = (TextView) findViewById(R.id.textView_overView);
-        textView_overView.setText(overView);
-        textView_date = (TextView) findViewById(R.id.textView_date);
-        textView_date.setText(date);
-        ratingBar = (RatingBar) findViewById(R.id.ratingBar);
-        ratingBar.setRating((float) rating);
-
-        dynamicTrailersView = (LinearLayout) findViewById(R.id.linearLayout_trailers);
-        getTrailers();
-
-        dynamicReviewsView = (LinearLayout) findViewById(R.id.linearLayout_reviews);
-        getReviews();
+//        //initialize views
+//        image_poster = (ImageView) findViewById(R.id.image_poster);
+//        Picasso.with(this).load(poster).into(image_poster);
+//        textView_title = (TextView) findViewById(R.id.textView_title);
+//        textView_title.setText(title);
+//        textView_rating = (TextView) findViewById(R.id.textView_Rating);
+//        textView_rating.setText(rating + " / 10.0");
+//        textView_overView = (TextView) findViewById(R.id.textView_overView);
+//        textView_overView.setText(overView);
+//        textView_date = (TextView) findViewById(R.id.textView_date);
+//        textView_date.setText(date);
+//        ratingBar = (RatingBar) findViewById(R.id.ratingBar);
+//        ratingBar.setRating((float) rating);
+////
+//        findViewById(R.id.button_favorite).setOnClickListener(this);
+//
+//        dynamicReviewsView = (LinearLayout) findViewById(R.id.linearLayout_reviews);
+//        dynamicTrailersView = (LinearLayout) findViewById(R.id.linearLayout_trailers);
+//
+//        findViewById(R.id.button_reviews).setOnClickListener(this);
+//        findViewById(R.id.button_trailers).setOnClickListener(this);
     }
 
     private void getReviews() {
@@ -154,4 +163,55 @@ public class MovieDetails extends AppCompatActivity {
         });
     }
 
+//
+//    @Override
+//    public void onClick(View view) {
+//        if (view.getId() == R.id.button_favorite) {
+//            addMovieToFav();
+//        }
+//        else if (view.getId() == R.id.button_trailers){
+//            if (!trailersFlag) {
+//                getTrailers();
+//                trailersFlag = true;
+//            }
+//        }
+//        else if (view.getId() == R.id.button_reviews){
+//            if (!reviewsFlag) {
+//                getReviews();
+//                reviewsFlag = true;
+//            }
+//        }
+//    }
+//
+//    private void addMovieToFav() {
+//        Realm realm = Realm.getDefaultInstance();
+//        try {
+//            realm.executeTransaction(new Realm.Transaction() {
+//                @Override
+//                public void execute(Realm realm) {
+//                    MovieDb movieDb = realm.createObject(MovieDb.class, movieId);
+//                    movieDb.name= title;
+//                    movieDb.poster = poster;
+//                    movieDb.movieId = movieId;
+//                    movieDb.rating = rating;
+//                    movieDb.overView = overView;
+//                    movieDb.date = date;
+//                }
+//            });
+//            Toast.makeText(getContext(), "Added to favorites", Toast.LENGTH_SHORT).show();
+//        }
+//        catch (RealmPrimaryKeyConstraintException exception){
+//            Log.d(TAG, "saveMovieToDb: "+exception.toString());
+//            realm.executeTransaction(new Realm.Transaction() {
+//                @Override
+//                public void execute(Realm realm) {
+//                    RealmResults<MovieDb> result = realm.where(MovieDb.class).equalTo("movieId", movieId).findAll();
+//                    result.deleteAllFromRealm();
+//                }
+//            });
+//            Toast.makeText(getContext(), "Removed from favorites", Toast.LENGTH_SHORT).show();
+//
+//        }
+//        realm.close();
+//    }
 }

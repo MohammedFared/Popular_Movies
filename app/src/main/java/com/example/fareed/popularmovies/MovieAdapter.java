@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -23,10 +24,11 @@ public class MovieAdapter extends BaseAdapter {
     ArrayList<Double> rating;
 
     LayoutInflater inflater;
-    public MovieAdapter(Context context, ArrayList<String> posterUrl, ArrayList<String> title){
+    public MovieAdapter(Context context, ArrayList<String> posterUrl, ArrayList<String> title, ArrayList<Double> rating){
         this.context = context;
         this.posterUrls=posterUrl;
         this.title = title;
+        this.rating = rating;
         inflater = (LayoutInflater.from(context));
     }
 
@@ -58,9 +60,9 @@ public class MovieAdapter extends BaseAdapter {
         TextView textView = (TextView) convertView.findViewById(R.id.textView_itemTitle);
         textView.setText(title.get(position));
 
-//        RatingBar ratingBar = (RatingBar) convertView.findViewById(R.id.ratingBar_itemRating);
-//        double ratingDouble = rating.get(position);
-//        ratingBar.setRating((float) ratingDouble);
+        RatingBar ratingBar = (RatingBar) convertView.findViewById(R.id.ratingBar_itemRating);
+        double ratingDouble = rating.get(position);
+        ratingBar.setRating((float) ratingDouble);
 
         return convertView;
     }

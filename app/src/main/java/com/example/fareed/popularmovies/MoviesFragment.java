@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,40 +26,17 @@ import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 
-public class MoviesGrid extends Fragment implements AdapterView.OnItemClickListener{
+public class MoviesFragment extends Fragment implements AdapterView.OnItemClickListener{
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        index = moviesGrid.getFirstVisiblePosition();
-        outState.putInt("index", index);
-        outState.putStringArrayList("posters", posters);
-        outState.putStringArrayList("date", date);
-        outState.putStringArrayList("title", title);
-        outState.putStringArrayList("overView", overView);
-        outState.putIntegerArrayList("movieId", movieId);
-
-        outState.putInt("flag", flag);
-        outState.putInt("flagLoadMoreData", flagLoadMoreData);
-        Log.d(TAG, "onSaveInstanceState: restore "+index);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-
-    }
-
-    public MoviesGrid() {
-        // Required empty public constructor
-    }
-
-    int flag, flagLoadMoreData, index;
+    // 0 >> popular   1 >> topRated
+    int flag, flagLoadMoreData = 0, index;
     Context mContext = getContext();
     String TAG = "MOVIESGRIDLOG";
     SwipeRefreshLayout swipeContainer;
@@ -78,8 +54,62 @@ public class MoviesGrid extends Fragment implements AdapterView.OnItemClickListe
     String APIKEY = "api_key="+BuildConfig.MOVIE_API_KEY;
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        index = moviesGrid.getFirstVisiblePosition();
+        outState.putInt("index", index);
+        outState.putStringArrayList("posters", posters);
+        outState.putStringArrayList("date", date);
+        outState.putStringArrayList("title", title);
+        outState.putStringArrayList("overView", overView);
+        outState.putIntegerArrayList("movieId", movieId);
+
+        double[] ratingArr = new double[rating.size()];
+        for (int i = 0; i < ratingArr.length; i++) {
+//            ratingArr[i] = rating.get(i).doubleValue();  // java 1.4 style
+            // or:
+            ratingArr[i] = rating.get(i);                // java 1.5+ style (outboxing)
+        }
+        Log.d(TAG, "onSaveInstanceState: "+ Arrays.toString(ratingArr));
+        outState.putDoubleArray("rating", ratingArr);
+
+        outState.putInt("flag", flag);
+        outState.putInt("page", page);
+        outState.putInt("flagLoadMoreData", flagLoadMoreData);
+        Log.d(TAG, "onSaveInstanceState: restore "+index);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+
+    }
+
+    public MoviesFragment() {
+        // Required empty public constructor
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (!isOnline()){
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_activty, new NoInternetFragment())
+                    .commit();
+        }
+    }
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            if (getArguments().getBoolean("masterDetail")) {
+                //TODO: Add the first movie to the detail fragment
+                }
+        }
+        if (!isOnline()){
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_activty, new NoInternetFragment())
+                    .commit();
+        }
         Toast.makeText(getContext(), "Fragment is here", Toast.LENGTH_SHORT).show();
         if (savedInstanceState!= null) {
             index = savedInstanceState.getInt("index", 3);
@@ -90,28 +120,22 @@ public class MoviesGrid extends Fragment implements AdapterView.OnItemClickListe
             title = savedInstanceState.getStringArrayList("title");
             overView = savedInstanceState.getStringArrayList("overView");
             movieId = savedInstanceState.getIntegerArrayList("movieId");
+            page = savedInstanceState.getInt("page");
 
-            Log.d(TAG, "onCreate index: " + index);
-//        url = "http://api.themoviedb.org/3/movie/popular?page=1&api_key=3a624f843f50800c01512368404f203e";
-//        filterList(url);
-            movieAdapter = new MovieAdapter(getContext(), posters, title);
-            moviesGrid.setAdapter(movieAdapter);
-            moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
-                @Override
-                public boolean onLoadMore(int page, int totalItemsCount) {
-                    // Triggered only when new data needs to be appended to the list
-                    // Add whatever code is needed to append new items to your AdapterView
-                    loadMoreData(page);
-                    // or customLoadMoreDataFromApi(totalItemsCount);
-                    return true; // ONLY if more data is actually being loaded; false otherwise.
-                }
-            });
-            progressBar.setVisibility(View.GONE);
-            moviesGrid.setSelection(index);
+            double[] firstValueArray = savedInstanceState.getDoubleArray("rating");
+            Log.d(TAG, "onCreate: "+firstValueArray.toString());
+            for(double d : firstValueArray) rating.add(d);
+
+            movieAdapter = new MovieAdapter(getContext(), posters, title, rating);
         }
     }
 
     private void filterList(String url) {
+        if (!isOnline()){
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_activty, new NoInternetFragment())
+                    .commit();
+        }
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         swipeContainer.setRefreshing(true);
         Log.d(TAG+"log", "filterList: "+url);
@@ -128,21 +152,18 @@ public class MoviesGrid extends Fragment implements AdapterView.OnItemClickListe
                     overView.add(result.getOverview());
                     date.add(result.getRelease_date());
                     rating.add(result.getVote_average());
-
-                    movieAdapter = new MovieAdapter(getContext(), posters, title);
+                    movieAdapter = new MovieAdapter(getActivity(), posters, title, rating);
                     moviesGrid.setAdapter(movieAdapter);
-                    swipeContainer.setRefreshing(false);
-                    progressBar.setVisibility(View.GONE);
                 }
+                swipeContainer.setRefreshing(false);
+                progressBar.setVisibility(View.GONE);
 //                Log.d("MainActivity", "onSuccess: Posters: "+ Arrays.toString(posters));
-
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
             }
         });
     }
-
 
     //append more data to the adapter
     private void loadMoreData(int page) {
@@ -151,12 +172,12 @@ public class MoviesGrid extends Fragment implements AdapterView.OnItemClickListe
         // Deserialize API response and then construct new objects to append to the adapter
         this.page= page;
         swipeContainer.setRefreshing(true);
-        if (flagLoadMoreData == 1)
+        if (flagLoadMoreData == 0)
             url = "http://api.themoviedb.org/3/movie/popular?page=" + page + "&" + APIKEY;
-        else if (flagLoadMoreData == 0)
+        else if (flagLoadMoreData == 1)
             url = "http://api.themoviedb.org/3/movie/top_rated?page=" + page + "&" + APIKEY;
 
-//        Log.d("MAINACTIVITY", "loadMoreData: "+url);
+        Log.d(TAG, "loadMoreData: "+url);
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         asyncHttpClient.get(mContext, url, new AsyncHttpResponseHandler() {
             @Override
@@ -188,12 +209,28 @@ public class MoviesGrid extends Fragment implements AdapterView.OnItemClickListe
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
+        setHasOptionsMenu(true);
         moviesGrid = (GridView) view.findViewById(R.id.moviesGrid);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
         textView = (TextView) view.findViewById(R.id.textView_popOrTop);
         swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
-        if (savedInstanceState == null){
-            moviesGrid.setOnScrollListener(new com.example.fareed.popularmovies.EndlessScrollListener() {
+        if (savedInstanceState!=null){
+            moviesGrid.setAdapter(movieAdapter);
+            moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
+                @Override
+                public boolean onLoadMore(int page, int totalItemsCount) {
+                    // Triggered only when new data needs to be appended to the list
+                    // Add whatever code is needed to append new items to your AdapterView
+                    loadMoreData(page);
+                    // or customLoadMoreDataFromApi(totalItemsCount);
+                    return true; // ONLY if more data is actually being loaded; false otherwise.
+                }
+            });
+            progressBar.setVisibility(View.GONE);
+            moviesGrid.setSelection(index);
+        } else  {
+            page=0;
+            moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
                 @Override
                 public boolean onLoadMore(int page, int totalItemsCount) {
                     // Triggered only when new data needs to be appended to the list
@@ -225,14 +262,34 @@ public class MoviesGrid extends Fragment implements AdapterView.OnItemClickListe
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         Log.d(TAG, "onItemClick: "+position);
-        Intent intent = new Intent(getContext(), MovieDetails.class);
-        intent.putExtra("title", title.get(position));
-        intent.putExtra("date", date.get(position));
-        intent.putExtra("poster", "https://image.tmdb.org/t/p/w185" + posters.get(position));
-//            intent.putExtra("rating", rating.get(position));
-        intent.putExtra("overView", overView.get(position));
-        intent.putExtra("movieId", movieId.get(position));
-        startActivity(intent);
+//        Intent intent = new Intent(getContext(), MovieDetails.class);
+        MovieDetailsFragment movieDetailsFragment = new MovieDetailsFragment();
+        Bundle args = new Bundle();
+        args.putString("title", title.get(position));
+        args.putString("date", date.get(position));
+        args.putString("poster", "https://image.tmdb.org/t/p/w185" + posters.get(position));
+        args.putDouble("rating", rating.get(position));
+        args.putString("overView", overView.get(position));
+        args.putInt("movieId", movieId.get(position));
+        movieDetailsFragment.setArguments(args);
+        if (getArguments() != null) {
+            if (getArguments().getBoolean("masterDetail")) { // if tablet load the detail into the rightFrame
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.rightFrame, movieDetailsFragment)
+                        .commit();
+            } else { // if not tablet load it into the activity
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_activty, movieDetailsFragment)
+                        .addToBackStack("moviesDetails")
+                        .commit();
+            }
+        }
+        else { // if not tablet too
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_activty, movieDetailsFragment)
+                    .addToBackStack("moviesDetails")
+                    .commit();
+        }
     }
 
     @Override
@@ -241,46 +298,70 @@ public class MoviesGrid extends Fragment implements AdapterView.OnItemClickListe
         if (item.getItemId() == R.id.menuFilter){
             if(flag == 1) {
                 flag=0;
-                flagLoadMoreData=1;
-                posters.clear();
-                movieId.clear();
-                title.clear();
-                overView.clear();
-                date.clear();
-                rating.clear();
-                url = "http://api.themoviedb.org/3/movie/popular?page=1&"+APIKEY;
-                Log.d(TAG, "onCreate: "+url);
+                flagLoadMoreData=0;
+                clearResources();
                 textView.setText("Popular");
+                url = "http://api.themoviedb.org/3/movie/popular?page=1&"+APIKEY;
                 filterList(url);
                 return super.onOptionsItemSelected(item);
             }
             else if(flag == 0) {
                 flag = 1;
-                flagLoadMoreData=0;
-                posters.clear();
-                movieId.clear();
-                title.clear();
-                overView.clear();
-                date.clear();
-                rating.clear();
-                url = "http://api.themoviedb.org/3/movie/top_rated?page=1&"+APIKEY;
-                Log.d(TAG, "onCreate: "+url);
+                flagLoadMoreData=1;
                 textView.setText("Top rated");
+                clearResources();
+                url = "http://api.themoviedb.org/3/movie/top_rated?page=1&"+APIKEY;
                 filterList(url);
                 return super.onOptionsItemSelected(item);
             }
         }
+        else if (item.getItemId() == R.id.favorites){
+            startActivity(new Intent(getContext(), Favorites.class));
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void clearResources() {
+        posters.clear();
+        movieId.clear();
+        title.clear();
+        overView.clear();
+        date.clear();
+        rating.clear();
+        Log.d(TAG, "optionsItemClicked: "+url);
+        page = 1;
+        moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
+            @Override
+            public boolean onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                loadMoreData(page);
+                // or customLoadMoreDataFromApi(totalItemsCount);
+                return true; // ONLY if more data is actually being loaded; false otherwise.
+            }
+        });
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_main, menu);
         MenuItem menuItem = menu.findItem(R.id.menuFilter);
-        Drawable drawable = menuItem.getIcon();
-        if (drawable != null) {
-            drawable.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-        }
+        menuItem.getIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+        menuItem = menu.findItem(R.id.favorites);
+        menuItem.getIcon().setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
     }
 }
