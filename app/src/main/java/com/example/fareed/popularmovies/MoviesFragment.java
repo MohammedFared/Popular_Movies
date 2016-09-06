@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -65,9 +64,7 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
 
         double[] ratingArr = new double[rating.size()];
         for (int i = 0; i < ratingArr.length; i++) {
-//            ratingArr[i] = rating.get(i).doubleValue();  // java 1.4 style
-            // or:
-            ratingArr[i] = rating.get(i);                // java 1.5+ style (outboxing)
+            ratingArr[i] = rating.get(i);
         }
         Log.d(TAG, "onSaveInstanceState: "+ Arrays.toString(ratingArr));
         outState.putDoubleArray("rating", ratingArr);
@@ -79,15 +76,10 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-
-    }
-
     public MoviesFragment() {
         // Required empty public constructor
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -100,6 +92,7 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //if tablet mode
         if (getArguments() != null) {
             if (getArguments().getBoolean("masterDetail")) {
                 //TODO: Add the first movie to the detail fragment
@@ -110,8 +103,8 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
                     .replace(R.id.main_activty, new NoInternetFragment())
                     .commit();
         }
-        Toast.makeText(getContext(), "Fragment is here", Toast.LENGTH_SHORT).show();
         if (savedInstanceState!= null) {
+            Toast.makeText(getContext(), "Fragment is here", Toast.LENGTH_SHORT).show();
             index = savedInstanceState.getInt("index", 3);
             flag = savedInstanceState.getInt("flag");
             flagLoadMoreData = savedInstanceState.getInt("flagLoadMoreData");
@@ -129,6 +122,64 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             movieAdapter = new MovieAdapter(getContext(), posters, title, rating);
         }
     }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
+        setHasOptionsMenu(true);
+        moviesGrid = (GridView) view.findViewById(R.id.moviesGrid);
+        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        textView = (TextView) view.findViewById(R.id.textView_popOrTop);
+        swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
+        if (savedInstanceState!=null) {
+            Log.d(TAG, "onCreateView: savedInstanceState != NULL");
+            moviesGrid.setAdapter(movieAdapter);
+            moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
+                @Override
+                public boolean onLoadMore(int page, int totalItemsCount) {
+                    // Triggered only when new data needs to be appended to the list
+                    // Add whatever code is needed to append new items to your AdapterView
+                    loadMoreData(page);
+                    // or customLoadMoreDataFromApi(totalItemsCount);
+                    return true; // ONLY if more data is actually being loaded; false otherwise.
+                }
+            });
+            progressBar.setVisibility(View.GONE);
+            moviesGrid.setSelection(index);
+        } else if (savedInstanceState == null){
+            Log.d(TAG, "onCreateView: savedInstanceState == NULL");
+            page=0;
+            moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
+                @Override
+                public boolean onLoadMore(int page, int totalItemsCount) {
+                    // Triggered only when new data needs to be appended to the list
+                    // Add whatever code is needed to append new items to your AdapterView
+                    loadMoreData(page);
+                    return true; // ONLY if more data is actually being loaded; false otherwise.
+                }
+            });
+            swipeContainer.setRefreshing(true);
+            Log.d(TAG, "onCreate: restore");
+            flag = 0;
+            url = "http://api.themoviedb.org/3/movie/popular?page=1&"+APIKEY;
+            progressBar.setVisibility(View.VISIBLE);
+            filterList(url);
+            swipeContainer.setRefreshing(false);
+        }
+
+        moviesGrid.setOnItemClickListener(this);
+
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeContainer.setRefreshing(false);
+            }
+        });
+        return view;
+    }
+
 
     private void filterList(String url) {
         if (!isOnline()){
@@ -203,61 +254,6 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
         });
     }
 
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
-        setHasOptionsMenu(true);
-        moviesGrid = (GridView) view.findViewById(R.id.moviesGrid);
-        progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
-        textView = (TextView) view.findViewById(R.id.textView_popOrTop);
-        swipeContainer = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
-        if (savedInstanceState!=null){
-            moviesGrid.setAdapter(movieAdapter);
-            moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
-                @Override
-                public boolean onLoadMore(int page, int totalItemsCount) {
-                    // Triggered only when new data needs to be appended to the list
-                    // Add whatever code is needed to append new items to your AdapterView
-                    loadMoreData(page);
-                    // or customLoadMoreDataFromApi(totalItemsCount);
-                    return true; // ONLY if more data is actually being loaded; false otherwise.
-                }
-            });
-            progressBar.setVisibility(View.GONE);
-            moviesGrid.setSelection(index);
-        } else  {
-            page=0;
-            moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
-                @Override
-                public boolean onLoadMore(int page, int totalItemsCount) {
-                    // Triggered only when new data needs to be appended to the list
-                    // Add whatever code is needed to append new items to your AdapterView
-                    loadMoreData(page);
-                    return true; // ONLY if more data is actually being loaded; false otherwise.
-                }
-            });
-            swipeContainer.setRefreshing(true);
-            Log.d(TAG, "onCreate: restore");
-            flag = 0;
-            url = "http://api.themoviedb.org/3/movie/popular?page=1&"+APIKEY;
-            progressBar.setVisibility(View.VISIBLE);
-            filterList(url);
-            swipeContainer.setRefreshing(false);
-        }
-
-        moviesGrid.setOnItemClickListener(this);
-
-        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                swipeContainer.setRefreshing(false);
-            }
-        });
-        return view;
-    }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {

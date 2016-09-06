@@ -2,6 +2,7 @@ package com.example.fareed.popularmovies;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.facebook.stetho.Stetho;
 import com.uphyca.stetho_realm.RealmInspectorModulesProvider;
@@ -12,7 +13,7 @@ import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
 public class MainActivity extends AppCompatActivity {
-
+    String TAG = "MAINACTIVITYLOG";
     boolean masterDetail = false;
 
     @Override
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).build();
         Realm.setDefaultConfiguration(realmConfig);
+        Log.d(TAG, "onCreate: ");
         Stetho.initialize(
                 Stetho.newInitializerBuilder(this)
                         .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (savedInstanceState == null)
         {
+            Log.d(TAG, "onCreate: savedInstanceState");
             if (isOnline()) {
                 if (findViewById(R.id.tablet_FramesContainer)!= null) {
                     masterDetail = true;
@@ -42,9 +45,8 @@ public class MainActivity extends AppCompatActivity {
                     args.putBoolean("masterDetail", masterDetail);
                     moviesFragment.setArguments(args);
                     getSupportFragmentManager().beginTransaction()
-                            .add(R.id.leftFrame, moviesFragment)
+                            .replace(R.id.leftFrame, moviesFragment)
                             .commit();
-
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.rightFrame, new MovieDetailsFragment())
                             .commit();
@@ -52,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     masterDetail = false;
                     getSupportFragmentManager().beginTransaction()
-                            .add(R.id.main_activty, new MoviesFragment())
+                            .replace(R.id.main_activty, new MoviesFragment())
+                            .addToBackStack("")
                             .commit();
                 }
             }
