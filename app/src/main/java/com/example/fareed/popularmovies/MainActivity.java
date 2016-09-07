@@ -33,10 +33,9 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_activty, new NoInternetFragment())
                     .commit();
-        }
-        if (savedInstanceState == null)
+        } if (savedInstanceState == null)
         {
-            Log.d(TAG, "onCreate: savedInstanceState");
+            Log.d(TAG, "onCreate: savedInstanceState == null");
             if (isOnline()) {
                 if (findViewById(R.id.tablet_FramesContainer)!= null) {
                     masterDetail = true;
@@ -54,16 +53,18 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     masterDetail = false;
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.main_activty, new MoviesFragment())
-                            .addToBackStack("")
+                            .add(R.id.main_activty, new MoviesFragment())
                             .commit();
                 }
             }
             else {
+                Log.d(TAG, "onCreate: savedInstanceState == null");
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_activty, new NoInternetFragment())
+                        .add(R.id.main_activty, new NoInternetFragment())
                         .commit();
             }
+        } else {
+            Log.d(TAG, "onCreate: savedInstanceState != null");
         }
     }
 

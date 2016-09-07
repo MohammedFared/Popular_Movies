@@ -52,6 +52,8 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
     ProgressBar progressBar;
     String APIKEY = "api_key="+BuildConfig.MOVIE_API_KEY;
 
+    Bundle savedInstanceState;
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         index = moviesGrid.getFirstVisiblePosition();
@@ -91,7 +93,10 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
     }
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate: ");
         super.onCreate(savedInstanceState);
+        this.savedInstanceState = savedInstanceState;
+        ((MainActivity)getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         //if tablet mode
         if (getArguments() != null) {
             if (getArguments().getBoolean("masterDetail")) {
@@ -103,6 +108,7 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
                     .replace(R.id.main_activty, new NoInternetFragment())
                     .commit();
         }
+
         if (savedInstanceState!= null) {
             Toast.makeText(getContext(), "Fragment is here", Toast.LENGTH_SHORT).show();
             index = savedInstanceState.getInt("index", 3);
@@ -120,12 +126,22 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             for(double d : firstValueArray) rating.add(d);
 
             movieAdapter = new MovieAdapter(getContext(), posters, title, rating);
+        } else {
+            posters = new ArrayList<>();
+            movieId = new ArrayList<>();
+            title = new ArrayList<>();
+            overView = new ArrayList<>();
+            date = new ArrayList<>();
+            rating = new ArrayList<>();
+            Log.d(TAG, "onCreate: savedInstanceState == null");
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView: ");
+        savedInstanceState = this.savedInstanceState;
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
         setHasOptionsMenu(true);
@@ -149,6 +165,12 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             progressBar.setVisibility(View.GONE);
             moviesGrid.setSelection(index);
         } else if (savedInstanceState == null){
+            posters = new ArrayList<>();
+            movieId = new ArrayList<>();
+            title = new ArrayList<>();
+            overView = new ArrayList<>();
+            date = new ArrayList<>();
+            rating = new ArrayList<>();
             Log.d(TAG, "onCreateView: savedInstanceState == NULL");
             page=0;
             moviesGrid.setOnScrollListener(new EndlessScrollListener(6, page) {
@@ -161,7 +183,6 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
                 }
             });
             swipeContainer.setRefreshing(true);
-            Log.d(TAG, "onCreate: restore");
             flag = 0;
             url = "http://api.themoviedb.org/3/movie/popular?page=1&"+APIKEY;
             progressBar.setVisibility(View.VISIBLE);
@@ -179,7 +200,6 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
         });
         return view;
     }
-
 
     private void filterList(String url) {
         if (!isOnline()){
