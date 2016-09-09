@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -65,12 +66,12 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
             movieId = getArguments().getInt("movieId", 1);
         }
     }
-
+    View view;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_movie_details, container, false);
+        view = inflater.inflate(R.layout.fragment_movie_details, container, false);
         //initialize views
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar_details);
         progressBar.setVisibility(View.GONE);
@@ -132,6 +133,9 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Snackbar.make(view, "No Internet!!", Snackbar.LENGTH_LONG).show();
+                progressBar.setVisibility(View.GONE);
+                reviewsFlag = false;
             }
         });
     }
@@ -179,6 +183,9 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Snackbar.make(view, "No Internet!!", Snackbar.LENGTH_LONG).show();
+                progressBar.setVisibility(View.GONE);
+                trailersFlag = false;
             }
         });
     }
@@ -189,6 +196,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
             addMovieToFav();
         }
         else if (view.getId() == R.id.button_trailers){
+            //To check if the trailers already loaded!
             if (!trailersFlag) {
                 getTrailers();
                 trailersFlag = true;

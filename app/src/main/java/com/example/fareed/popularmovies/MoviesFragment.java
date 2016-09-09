@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -37,7 +38,7 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
     // 0 >> popular   1 >> topRated
     int flag, flagLoadMoreData = 0, index;
     Context mContext = getContext();
-    String TAG = "MOVIESGRIDLOG";
+    public static String TAG = "MOVIESGRIDLOG";
     SwipeRefreshLayout swipeContainer;
     Gson gson;
     MovieBean movieBean;
@@ -101,13 +102,13 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
         if (getArguments() != null) {
             if (getArguments().getBoolean("masterDetail")) {
                 //TODO: Add the first movie to the detail fragment
-                }
+            }
         }
-        if (!isOnline()){
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_activty, new NoInternetFragment())
-                    .commit();
-        }
+//        if (!isOnline()){
+//            getActivity().getSupportFragmentManager().beginTransaction()
+//                    .replace(R.id.main_activty, new NoInternetFragment())
+//                    .commit();
+//        }
 
         if (savedInstanceState!= null) {
             Toast.makeText(getContext(), "Fragment is here", Toast.LENGTH_SHORT).show();
@@ -122,10 +123,10 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             page = savedInstanceState.getInt("page");
 
             double[] firstValueArray = savedInstanceState.getDoubleArray("rating");
-            Log.d(TAG, "onCreate: "+firstValueArray.toString());
+            Log.d(TAG, "onCreate: savedInstanceState != null");
             for(double d : firstValueArray) rating.add(d);
 
-            movieAdapter = new MovieAdapter(getContext(), posters, title, rating);
+            movieAdapter = new MovieAdapter(getContext(), posters, title, rating); 
         } else {
             posters = new ArrayList<>();
             movieId = new ArrayList<>();
@@ -136,14 +137,14 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             Log.d(TAG, "onCreate: savedInstanceState == null");
         }
     }
-
+    View view;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView: ");
-        savedInstanceState = this.savedInstanceState;
+//        savedInstanceState = this.savedInstanceState;
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
+         view = inflater.inflate(R.layout.fragment_movies_grid, container, false);
         setHasOptionsMenu(true);
         moviesGrid = (GridView) view.findViewById(R.id.moviesGrid);
         progressBar = (ProgressBar) view.findViewById(R.id.progressBar);
@@ -270,6 +271,12 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Snackbar.make(view, "No Internet!!", Snackbar.LENGTH_LONG).show();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_activty, new NoInternetFragment())
+                        .commit();
+                progressBar.setVisibility(View.GONE);
+
             }
         });
     }
@@ -292,6 +299,7 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             if (getArguments().getBoolean("masterDetail")) { // if tablet load the detail into the rightFrame
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.rightFrame, movieDetailsFragment)
+                        .addToBackStack("moviesDetails")
                         .commit();
             } else { // if not tablet load it into the activity
                 getActivity().getSupportFragmentManager().beginTransaction()

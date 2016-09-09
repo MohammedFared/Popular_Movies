@@ -1,6 +1,7 @@
 <RelativeLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:id="@+id/fragment_movie_details"
     android:background="#f0f0f0"
     android:layout_height="match_parent">
 <ScrollView

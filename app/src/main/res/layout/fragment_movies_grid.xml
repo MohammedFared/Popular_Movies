@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_movies_grid"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -7,11 +8,15 @@
 
     <TextView
         android:id="@+id/textView_popOrTop"
-        android:layout_width="wrap_content"
+        android:background="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:padding="16dp"
         android:text="@string/popular"
-        android:textAppearance="?android:textAppearanceLarge" />
+        android:elevation="@dimen/cardview_default_elevation"
+        android:textAppearance="?android:textAppearanceLarge"
+        tools:targetApi="lollipop" />
 
     <ProgressBar
         android:id="@+id/progressBar"

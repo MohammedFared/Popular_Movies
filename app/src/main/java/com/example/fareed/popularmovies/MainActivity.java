@@ -33,11 +33,11 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_activty, new NoInternetFragment())
                     .commit();
-        } if (savedInstanceState == null)
-        {
+        }
+        else if (savedInstanceState == null){
             Log.d(TAG, "onCreate: savedInstanceState == null");
             if (isOnline()) {
-                if (findViewById(R.id.tablet_FramesContainer)!= null) {
+                if (findViewById(R.id.tablet_FramesContainer)!= null) { //tablet mode
                     masterDetail = true;
                     MoviesFragment moviesFragment = new MoviesFragment();
                     Bundle args = new Bundle();
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     masterDetail = false;
                     getSupportFragmentManager().beginTransaction()
-                            .add(R.id.main_activty, new MoviesFragment())
+                            .add(R.id.flContent, new MoviesFragment())
                             .commit();
                 }
             }
