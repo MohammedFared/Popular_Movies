@@ -223,6 +223,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                     dynamicTrailersView.addView(btn);
                 }
                 progressBar.setVisibility(View.GONE);
+                share_button.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -242,7 +243,6 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
             //To check if the trailers already loaded!
             if (!trailersFlag) {
                 getTrailers();
-                share_button.setVisibility(View.VISIBLE);
                 trailersFlag = true;
             }
         } else if (view.getId() == R.id.button_reviews) {
@@ -255,6 +255,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                 Intent i = new Intent(Intent.ACTION_SEND);
                 i.setType("text/plain");
                 i.putExtra(Intent.EXTRA_SUBJECT, "Sharing URL");
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 i.putExtra(Intent.EXTRA_TEXT, "https://www.youtube.com/watch?v="+ trailers.get(0).getKey());
                 startActivity(Intent.createChooser(i, "Share URL"));
             }
