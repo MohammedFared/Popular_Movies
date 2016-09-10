@@ -16,7 +16,7 @@
 
     <LinearLayout
         android:layout_alignBottom="@id/image_itemPoster"
-        android:background="@color/colorPrimaryDark"
+        android:background="#8000796b"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -30,7 +30,8 @@
         android:textAlignment="center"
         android:id="@+id/textView_itemTitle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textAppearance="?textAppearanceListItem"/>
 
     <RatingBar
         android:padding="4dp"

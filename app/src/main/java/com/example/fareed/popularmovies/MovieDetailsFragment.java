@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,7 +48,8 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
     public MovieDetailsFragment() {
         // Required empty public constructor
     }
-    String TAG = "MOVIEDETAILSLOG", baseUrl = "http://api.themoviedb.org/3/movie/", APIKEY = "api_key="+BuildConfig.MOVIE_API_KEY;
+
+    String TAG = "MOVIEDETAILSLOG", baseUrl = "http://api.themoviedb.org/3/movie/", APIKEY = "api_key=" + BuildConfig.MOVIE_API_KEY;
     TextView textView_title, textView_rating, textView_overView, textView_date;
     ImageView image_poster;
     RatingBar ratingBar;
@@ -61,16 +63,21 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
     boolean trailersFlag = false, reviewsFlag = false;
 
     Realm realm;
+
+    @Override
+    public void onStart() {
+        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
+        super.onStart();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-         realm = Realm.getDefaultInstance();
+        realm = Realm.getDefaultInstance();
         if (getArguments() != null) {
             title = getArguments().getString("title");
             favorites = getArguments().getBoolean("activityFlag");
-            if (favorites) { // if it was called from the Favorites activity
-                ((Favorites) getActivity()).setActionBarTitle(title);
-            }
+
             date = getArguments().getString("date");
             poster = getArguments().getString("poster");
             rating = getArguments().getDouble("rating", 1.5);
@@ -79,8 +86,11 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
             movieId = getArguments().getInt("movieId", 1);
         }
     }
+
     View view;
-    ImageButton button_favorite;
+    Button button_favorite;
+    ImageButton share_button;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -99,21 +109,23 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
         textView_overView.setText(overView);
         textView_date = (TextView) view.findViewById(R.id.textView_date);
         textView_date.setText(date);
-//        ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
-//        ratingBar.setRating((float) rating);
+        ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
+        ratingBar.setRating((float) rating);
 
-        button_favorite = (ImageButton) view.findViewById(R.id.button_favorite);
+        button_favorite = (Button) view.findViewById(R.id.button_favorite);
         button_favorite.setOnClickListener(this);
         //check if there is already a movieID of this movie
         RealmQuery<MovieDb> result = realm.where(MovieDb.class).equalTo("movieId", movieId);
-        if (result.count() != 0){ // favorite movie
+        if (result.count() != 0) { // favorite movie
             Drawable fav = ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_black_24dp);
             fav.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
-            button_favorite.setBackground(fav);
-        } else {
+            button_favorite.setCompoundDrawablesWithIntrinsicBounds(null, fav, null, null);
+            button_favorite.setTextColor(Color.RED);
+        } else { // not in favorites
             Drawable fav = ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_border_black_24dp);
             fav.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_ATOP);
-            button_favorite.setBackground(fav);
+            button_favorite.setCompoundDrawablesWithIntrinsicBounds(null, fav, null, null);
+            button_favorite.setTextColor(Color.GRAY);
         }
 
         dynamicReviewsView = (LinearLayout) view.findViewById(R.id.linearLayout_reviews);
@@ -121,6 +133,9 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
 
         view.findViewById(R.id.button_reviews).setOnClickListener(this);
         view.findViewById(R.id.button_trailers).setOnClickListener(this);
+
+        share_button = (ImageButton) view.findViewById(R.id.share_button);
+        share_button.setOnClickListener(this);
 
         return view;
     }
@@ -136,7 +151,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                 Gson gson = new Gson();
                 mreviewBean = gson.fromJson(new String(responseBody), ReviewsBean.class);
                 final List<ReviewsBean.ResultsBean> results = mreviewBean.getResults();
-                if (results.isEmpty()){
+                if (results.isEmpty()) {
                     TextView textView = new TextView(getContext());
                     textView.setText("No reviews yet!");
                     dynamicReviewsView.addView(textView);
@@ -150,7 +165,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                     TextView textViewContent = new TextView(getContext());
                     textViewContent.setText(results.get(i).getContent());
                     textViewContent.setLayoutParams(lp);
-                    textViewContent.setPadding(16, 8, 8,8);
+                    textViewContent.setPadding(16, 8, 8, 8);
                     textViewContent.setTextAppearance(getContext(), android.R.style.TextAppearance_Material_Body1);
                     dynamicReviewsView.addView(textViewContent);
                 }
@@ -166,6 +181,8 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
         });
     }
 
+    List<TrailersBean.ResultsBean> trailers;
+
     private void getTrailers() {
         progressBar.setVisibility(View.VISIBLE);
         final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -176,30 +193,30 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
             public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                 Gson gson = new Gson();
                 trailersBean = gson.fromJson(new String(responseBody), TrailersBean.class);
-                final List<TrailersBean.ResultsBean> results = trailersBean.getResults();
-                if (results.isEmpty()){
+                trailers = trailersBean.getResults();
+                if (trailers.isEmpty()) {
                     TextView textView = new TextView(getContext());
                     textView.setText("No trailers yet!");
                     dynamicReviewsView.addView(textView);
                 }
-                for (int i = 0; i < results.size(); i++) {
+                for (int i = 0; i < trailers.size(); i++) {
                     Button btn = new Button(getContext());
                     btn.setId(i + 1);
-                    btn.setText(results.get(i).getName());
-                    Log.d(TAG, "onSuccess: " + results.get(i).getName());
+                    btn.setText(trailers.get(i).getName());
+                    Log.d(TAG, "onSuccess: " + trailers.get(i).getName());
                     btn.setLayoutParams(lp);
                     final int finalI = i;
                     btn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             Toast.makeText(getContext(), view.getId() + "", Toast.LENGTH_SHORT).show();
-                            results.get(finalI).getKey();
+                            trailers.get(finalI).getKey();
                             try {
                                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" +
-                                        results.get(finalI).getKey())));
+                                        trailers.get(finalI).getKey())));
                             } catch (ActivityNotFoundException ex) {
                                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" +
-                                        results.get(finalI).getKey())));
+                                        trailers.get(finalI).getKey())));
                             }
                         }
                     });
@@ -207,6 +224,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                 }
                 progressBar.setVisibility(View.GONE);
             }
+
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 Snackbar.make(view, "No Internet!!", Snackbar.LENGTH_LONG).show();
@@ -220,18 +238,25 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
     public void onClick(View view) {
         if (view.getId() == R.id.button_favorite) {
             addMovieToFav();
-        }
-        else if (view.getId() == R.id.button_trailers){
+        } else if (view.getId() == R.id.button_trailers) {
             //To check if the trailers already loaded!
             if (!trailersFlag) {
                 getTrailers();
+                share_button.setVisibility(View.VISIBLE);
                 trailersFlag = true;
             }
-        }
-        else if (view.getId() == R.id.button_reviews){
+        } else if (view.getId() == R.id.button_reviews) {
             if (!reviewsFlag) {
                 getReviews();
                 reviewsFlag = true;
+            }
+        } else if (view.getId() == R.id.share_button) {
+            if (!trailers.isEmpty()) {
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("text/plain");
+                i.putExtra(Intent.EXTRA_SUBJECT, "Sharing URL");
+                i.putExtra(Intent.EXTRA_TEXT, "https://www.youtube.com/watch?v="+ trailers.get(0).getKey());
+                startActivity(Intent.createChooser(i, "Share URL"));
             }
         }
     }
@@ -239,6 +264,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
     @Override
     public void onStop() {
         realm.close();
+        ((AppCompatActivity) getActivity()).getSupportActionBar().show();
         super.onStop();
     }
 
@@ -248,7 +274,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                 @Override
                 public void execute(Realm realm) {
                     MovieDb movieDb = realm.createObject(MovieDb.class, movieId);
-                    movieDb.name= title;
+                    movieDb.name = title;
                     movieDb.poster = poster;
                     movieDb.movieId = movieId;
                     movieDb.rating = rating;
@@ -258,12 +284,12 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
             });
             Drawable fav = ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_black_24dp);
             fav.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
-            button_favorite.setBackground(fav);
+            button_favorite.setCompoundDrawablesWithIntrinsicBounds(null, fav, null, null);
+            button_favorite.setTextColor(Color.RED);
 
             Toast.makeText(getContext(), "Added to favorites", Toast.LENGTH_SHORT).show();
-        }
-        catch (RealmPrimaryKeyConstraintException exception){
-            Log.d(TAG, "saveMovieToDb: "+exception.toString());
+        } catch (RealmPrimaryKeyConstraintException exception) {
+            Log.d(TAG, "saveMovieToDb: " + exception.toString());
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
@@ -273,7 +299,9 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
             });
             Drawable fav = ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_border_black_24dp);
             fav.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_ATOP);
-            button_favorite.setBackground(fav);
+            button_favorite.setCompoundDrawablesWithIntrinsicBounds(null, fav, null, null);
+            button_favorite.setTextColor(Color.GRAY);
+
             Toast.makeText(getContext(), "Removed from favorites", Toast.LENGTH_SHORT).show();
 
         }

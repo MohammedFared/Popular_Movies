@@ -8,12 +8,11 @@
 
     <TextView
         android:id="@+id/textView_popOrTop"
-        android:background="@color/colorPrimary"
-        android:textColor="@android:color/white"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:text="@string/popular"
+        android:textStyle="italic"
         android:elevation="@dimen/cardview_default_elevation"
         android:textAppearance="?android:textAppearanceLarge"
         tools:targetApi="lollipop" />
@@ -34,9 +33,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:columnWidth="150dp"
-            android:horizontalSpacing="8dp"
+            android:horizontalSpacing="4dp"
             android:numColumns="auto_fit"
             android:stretchMode="columnWidth"
-            android:verticalSpacing="8dp" />
+            android:verticalSpacing="4dp" />
     </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>

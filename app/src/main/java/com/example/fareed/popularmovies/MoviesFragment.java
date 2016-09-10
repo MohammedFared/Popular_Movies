@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -205,11 +206,6 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
     }
 
     private void filterList(String url) {
-        if (!isOnline()){
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_activty, new NoInternetFragment())
-                    .commit();
-        }
         AsyncHttpClient asyncHttpClient = new AsyncHttpClient();
         swipeContainer.setRefreshing(true);
         Log.d(TAG+"log", "filterList: "+url);
@@ -235,6 +231,11 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Snackbar.make(view, "No Internet!!", Snackbar.LENGTH_LONG).show();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_activty, new NoInternetFragment())
+                        .commit();
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -273,7 +274,7 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-//                Snackbar.make(view, "No Internet!!", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(view, "No Internet!!", Snackbar.LENGTH_LONG).show();
                 getActivity().getSupportFragmentManager().beginTransaction()
                         .replace(R.id.main_activty, new NoInternetFragment())
                         .commit();
