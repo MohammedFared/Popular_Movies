@@ -81,6 +81,7 @@ public class Favorites extends AppCompatActivity implements AdapterView.OnItemCl
         args.putString("date", date.get(position));
         args.putString("poster", posters.get(position));
         Log.d("favoritesLOG", "onItemClick: "+posters.get(position));
+        args.putBoolean("activityFlag", true);
         args.putDouble("rating", rating.get(position));
         args.putString("overView", overView.get(position));
         args.putInt("movieId", movieId.get(position));

@@ -2,15 +2,22 @@ package com.example.fareed.popularmovies;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -30,14 +37,16 @@ import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 
 public class MovieDetailsFragment extends Fragment implements View.OnClickListener {
+    private boolean favorites;
+
     public MovieDetailsFragment() {
         // Required empty public constructor
     }
-
     String TAG = "MOVIEDETAILSLOG", baseUrl = "http://api.themoviedb.org/3/movie/", APIKEY = "api_key="+BuildConfig.MOVIE_API_KEY;
     TextView textView_title, textView_rating, textView_overView, textView_date;
     ImageView image_poster;
@@ -51,13 +60,17 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
     double rating;
     boolean trailersFlag = false, reviewsFlag = false;
 
-
+    Realm realm;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+         realm = Realm.getDefaultInstance();
         if (getArguments() != null) {
             title = getArguments().getString("title");
-//            ((Favorites)getActivity()).setActionBarTitle(title);
+            favorites = getArguments().getBoolean("activityFlag");
+            if (favorites) { // if it was called from the Favorites activity
+                ((Favorites) getActivity()).setActionBarTitle(title);
+            }
             date = getArguments().getString("date");
             poster = getArguments().getString("poster");
             rating = getArguments().getDouble("rating", 1.5);
@@ -67,6 +80,7 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
         }
     }
     View view;
+    ImageButton button_favorite;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -88,7 +102,19 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
 //        ratingBar = (RatingBar) view.findViewById(R.id.ratingBar);
 //        ratingBar.setRating((float) rating);
 
-        view.findViewById(R.id.button_favorite).setOnClickListener(this);
+        button_favorite = (ImageButton) view.findViewById(R.id.button_favorite);
+        button_favorite.setOnClickListener(this);
+        //check if there is already a movieID of this movie
+        RealmQuery<MovieDb> result = realm.where(MovieDb.class).equalTo("movieId", movieId);
+        if (result.count() != 0){ // favorite movie
+            Drawable fav = ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_black_24dp);
+            fav.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+            button_favorite.setBackground(fav);
+        } else {
+            Drawable fav = ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_border_black_24dp);
+            fav.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_ATOP);
+            button_favorite.setBackground(fav);
+        }
 
         dynamicReviewsView = (LinearLayout) view.findViewById(R.id.linearLayout_reviews);
         dynamicTrailersView = (LinearLayout) view.findViewById(R.id.linearLayout_trailers);
@@ -210,8 +236,13 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
         }
     }
 
+    @Override
+    public void onStop() {
+        realm.close();
+        super.onStop();
+    }
+
     private void addMovieToFav() {
-        Realm realm = Realm.getDefaultInstance();
         try {
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
@@ -225,6 +256,10 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                     movieDb.date = date;
                 }
             });
+            Drawable fav = ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_black_24dp);
+            fav.setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+            button_favorite.setBackground(fav);
+
             Toast.makeText(getContext(), "Added to favorites", Toast.LENGTH_SHORT).show();
         }
         catch (RealmPrimaryKeyConstraintException exception){
@@ -236,11 +271,20 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                     result.deleteAllFromRealm();
                 }
             });
+            Drawable fav = ContextCompat.getDrawable(getContext(), R.drawable.ic_favorite_border_black_24dp);
+            fav.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_ATOP);
+            button_favorite.setBackground(fav);
             Toast.makeText(getContext(), "Removed from favorites", Toast.LENGTH_SHORT).show();
 
         }
-        realm.close();
     }
 
-
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        getActivity().invalidateOptionsMenu();
+        setHasOptionsMenu(false);
+        menu.clear();
+//        inflater.inflate(R.menu.no_internet, menu);
+    }
 }

@@ -17,11 +17,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Favorites"
+            android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".MovieDetails"
-            android:parentActivityName=".MainActivity" />
-        <activity android:name=".Favorites"
-            android:parentActivityName=".MainActivity"></activity>
+            android:parentActivityName=".Favorites" />
+
     </application>
 
 </manifest>

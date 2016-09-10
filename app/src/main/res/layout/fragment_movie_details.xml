@@ -64,16 +64,16 @@
                 android:layout_toEndOf="@id/image_poster"
                 android:text="5.5 /10.0" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/button_favorite"
                 android:layout_toRightOf="@id/image_poster"
                 android:layout_below="@id/textView_Rating"
                 android:layout_marginTop="16dp"
                 android:layout_marginLeft="16dp"
-                android:text="Add to Favorites"
-                android:backgroundTint="@color/colorAccent"
-                android:textColor="@android:color/white"
-                android:layout_width="match_parent"
+                android:padding="16dp"
+                android:background="@drawable/ic_favorite_border_black_24dp"
+                android:backgroundTint="@android:color/holo_red_light"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </RelativeLayout>
 

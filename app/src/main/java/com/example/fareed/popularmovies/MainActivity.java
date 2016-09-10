@@ -15,11 +15,13 @@ import io.realm.RealmConfiguration;
 public class MainActivity extends AppCompatActivity {
     String TAG = "MAINACTIVITYLOG";
     boolean masterDetail = false;
+    public void setActionBarTitle(String title){
+        getSupportActionBar().setTitle(title);
+    }
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    protected void onStart() {
         RealmConfiguration realmConfig = new RealmConfiguration.Builder(this).build();
         Realm.setDefaultConfiguration(realmConfig);
         Log.d(TAG, "onCreate: ");
@@ -28,6 +30,13 @@ public class MainActivity extends AppCompatActivity {
                         .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
                         .enableWebKitInspector(RealmInspectorModulesProvider.builder(this).build())
                         .build());
+        super.onStart();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         if (!isOnline()){
             getSupportFragmentManager().beginTransaction()
