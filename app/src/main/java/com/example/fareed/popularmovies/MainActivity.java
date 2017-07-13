@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(title);
     }
 
-
     @Override
     protected void onStart() {
         super.onStart();

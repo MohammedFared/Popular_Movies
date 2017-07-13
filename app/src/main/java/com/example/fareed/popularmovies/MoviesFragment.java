@@ -35,6 +35,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class MoviesFragment extends Fragment implements AdapterView.OnItemClickListener{
 
+
     // 0 >> popular   1 >> topRated
     int flag, flagLoadMoreData = 0, index;
     Context mContext = getContext();
@@ -51,7 +52,7 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
     GridView moviesGrid;
     private int page;
     ProgressBar progressBar;
-    String APIKEY = "api_key="+BuildConfig.MOVIE_API_KEY;
+    String APIKEY = "api_key="+ BuildConfig.MOVIE_API_KEY;
 
     Bundle savedInstanceState;
 
@@ -88,11 +89,11 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
         Log.d(TAG, "onStart: ");
         ((MainActivity) getActivity()).getSupportActionBar().setTitle("POP Movies");
         super.onStart();
-        if (!isOnline()){
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_activty, new NoInternetFragment())
-                    .commit();
-        }
+//        if (!isOnline()){
+//            getActivity().getSupportFragmentManager().beginTransaction()
+//                    .replace(R.id.main_activty, new NoInternetFragment())
+//                    .commit();
+//        }
     }
 
     @Override
@@ -342,7 +343,7 @@ public class MoviesFragment extends Fragment implements AdapterView.OnItemClickL
                 return super.onOptionsItemSelected(item);
             }
         }
-        else if (item.getItemId() == R.id.favorites){
+        else if (item.getItemId() == R.id.favorites) {
             startActivity(new Intent(getContext(), Favorites.class));
         }
         return super.onOptionsItemSelected(item);

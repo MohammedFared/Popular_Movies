@@ -42,6 +42,7 @@ import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import io.realm.exceptions.RealmPrimaryKeyConstraintException;
 
+
 public class MovieDetailsFragment extends Fragment implements View.OnClickListener {
     private boolean favorites;
 
@@ -203,7 +204,6 @@ public class MovieDetailsFragment extends Fragment implements View.OnClickListen
                     Button btn = new Button(getContext());
                     btn.setId(i + 1);
                     btn.setText(trailers.get(i).getName());
-                    Log.d(TAG, "onSuccess: " + trailers.get(i).getName());
                     btn.setLayoutParams(lp);
                     final int finalI = i;
                     btn.setOnClickListener(new View.OnClickListener() {

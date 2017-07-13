@@ -27,7 +27,7 @@ import java.util.List;
 import cz.msebera.android.httpclient.Header;
 
 public class MovieDetails extends AppCompatActivity  {
-    String TAG = "MOVIEDETAILSLOG", baseUrl = "http://api.themoviedb.org/3/movie/", APIKEY = "api_key="+BuildConfig.MOVIE_API_KEY;
+    String TAG = "MOVIEDETAILSLOG", baseUrl = "http://api.themoviedb.org/3/movie/", APIKEY = "api_key="+ BuildConfig.MOVIE_API_KEY;
     TextView textView_title, textView_rating, textView_overView, textView_date;
     ImageView image_poster;
     RatingBar ratingBar;
@@ -95,7 +95,7 @@ public class MovieDetails extends AppCompatActivity  {
                 Gson gson = new Gson();
                 mreviewBean = gson.fromJson(new String(responseBody), ReviewsBean.class);
                 final List<ReviewsBean.ResultsBean> results = mreviewBean.getResults();
-                if (results.isEmpty()){
+                if (results.isEmpty()) {
                     TextView textView = new TextView(MovieDetails.this);
                     textView.setText("No reviews yet!");
                     dynamicReviewsView.addView(textView);
@@ -156,7 +156,6 @@ public class MovieDetails extends AppCompatActivity  {
                     dynamicTrailersView.addView(btn);
                 }
             }
-
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
             }
